@@ -1,0 +1,6 @@
+#ifndef S3UTIL_CONFIG_H
+#define S3UTIL_CONFIG_H
+
+#cmakedefine IS_BE 1
+
+#endif /*S3UTIL_CONFIG_H*/
