@@ -13,71 +13,87 @@
 #include <endian.h>
 #endif
 
-#define S3DAT_ATTRIBUTE_INDEX 0x200
-#define S3DAT_ATTRIBUTE_SEQ 0x201
-#define S3DAT_ATTRIBUTE_SONG 0x20
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
-#define S3DAT_EXCEPTION_WRONG_RESTYPE 0x109
-#define S3DAT_EXCEPTION_IOERROR 0x101
-#define S3DAT_EXCEPTION_HEADER 0x102
-#define S3DAT_EXCEPTION_CONFLICTING_DATA 0x103
-#define S3DAT_EXCEPTION_INDEXTYPE 0x104
-#define S3DAT_EXCEPTION_OUT_OF_RANGE 0x105
-#define S3DAT_EXCEPTION_ICONV_ERROR 0x106
-#define S3DAT_EXCEPTION_OPEN 0x107
-#define S3DAT_EXCEPTION_IOSET 0x108
-#define S3DAT_EXCEPTION_WRONG_RESTYPE 0x109
-#define S3DAT_EXCEPTION_OUT_OF_MEMORY 0x200
+#define S3UTIL_ATTRIBUTE_INDEX 0x200
+#define S3UTIL_ATTRIBUTE_SEQ 0x201
+#define S3UTIL_ATTRIBUTE_SONG 0x20
+
+#define S3UTIL_EXCEPTION_WRONG_RESTYPE 0x109
+#define S3UTIL_EXCEPTION_IOERROR 0x101
+#define S3UTIL_EXCEPTION_HEADER 0x102
+#define S3UTIL_EXCEPTION_CONFLICTING_DATA 0x103
+#define S3UTIL_EXCEPTION_INDEXTYPE 0x104
+#define S3UTIL_EXCEPTION_OUT_OF_RANGE 0x105
+#define S3UTIL_EXCEPTION_ICONV_ERROR 0x106
+#define S3UTIL_EXCEPTION_OPEN 0x107
+#define S3UTIL_EXCEPTION_IOSET 0x108
+#define S3UTIL_EXCEPTION_WRONG_RESTYPE 0x109
+#define S3UTIL_EXCEPTION_OUT_OF_MEMORY 0x200
 
 
-#define S3DAT_IOSET_NATIVEOS 0x400
-#define S3DAT_IOSET_LINUX 0x401
-#define S3DAT_IOSET_WIN32 0x402
+#define S3UTIL_IOSET_NATIVEOS 0x400
+#define S3UTIL_IOSET_LINUX 0x401
+#define S3UTIL_IOSET_WIN32 0x402
 
-#define S3DAT_IOSET_DEFAULT 0x500
-#define S3DAT_IOSET_LIBC 0x501
+#define S3UTIL_IOSET_DEFAULT 0x500
+#define S3UTIL_IOSET_LIBC 0x501
 
 //memory mapped file
-#define S3DAT_IOSET_NATIVEOS_MMF 0x600
-#define S3DAT_IOSET_LINUX_MMF 0x601
-#define S3DAT_IOSET_WIN32_MMF 0x602
-#define S3DAT_IOSET_LINUX_MMF_FD 0x603
-#define S3DAT_IOSET_WIN32_MMF_HANDLE 0x604
+#define S3UTIL_IOSET_NATIVEOS_MMF 0x600
+#define S3UTIL_IOSET_LINUX_MMF 0x601
+#define S3UTIL_IOSET_WIN32_MMF 0x602
+#define S3UTIL_IOSET_LINUX_MMF_FD 0x603
+#define S3UTIL_IOSET_WIN32_MMF_HANDLE 0x604
 
 
-#define S3DAT_SEEK_CUR 0x20
-#define S3DAT_SEEK_SET 0x21
+#define S3UTIL_SEEK_CUR 0x20
+#define S3UTIL_SEEK_SET 0x21
 
-#define S3DAT_INTERNAL_OUT_OF_MEMORY(handle, throws) \
-	s3dat_throw(handle, throws, S3DAT_EXCEPTION_OUT_OF_MEMORY, NULL, NULL, 0)
+#define S3UTIL_INTERNAL_OUT_OF_MEMORY(memset, throws) \
+	s3util_throw(memset, throws, S3UTIL_EXCEPTION_OUT_OF_MEMORY, NULL, NULL, 0)
 
-#define S3DAT_HANDLE_EXCEPTION(handle, throws, file, function, line)  \
+#define S3UTIL_HANDLE_EXCEPTION(memset, throws, file, function, line) \
 	if(*throws != NULL) { \
-		s3dat_add_to_stack(handle, throws, file, function, line); \
+		s3util_add_to_stack(memset, throws, file, function, line); \
 		return; \
 	}
 
-typedef struct s3dat_internal_attribute_t s3dat_internal_attribute_t;
-typedef struct s3dat_internal_stack_t s3dat_internal_stack_t;
-typedef struct s3dat_exception_t s3dat_exception_t;
-typedef struct s3dat_memset_t s3dat_memset_t;
-typedef struct s3dat_ioset_t s3dat_ioset_t;
-typedef struct s3dat_mmf_t s3dat_mmf_t;
 
 
+#define S3UTIL_CONCAT(a, b) a##b
 
+#define S3UTIL_INTERNAL_READ(type, ioset, memset, throws) \
+	S3UTIL_CONCAT(s3util_internal_read, type)(ioset, memset, throws);
 
+#define S3UTIL_INTERNAL_WRITE(type, ioset, memset, to, throws) \
+	S3UTIL_CONCAT(s3util_internal_write, type)(ioset, memset, to, throws);
 
+typedef struct s3util_internal_attribute_t s3util_internal_attribute_t;
+typedef struct s3util_internal_stack_t s3util_internal_stack_t;
+typedef struct s3util_exception_t s3util_exception_t;
+typedef struct s3util_memset_t s3util_memset_t;
+typedef struct s3util_ioset_t s3util_ioset_t;
+typedef struct s3util_mmf_t s3util_mmf_t;
 
-struct s3dat_internal_stack_t {
-	uint8_t* file;
-	const uint8_t* function;
+struct s3util_internal_stack_t {
+	char* file;
+	const char* function;
 	uint32_t line;
 
-	s3dat_internal_stack_t* down;
+	s3util_internal_stack_t* down;
 };
 
-struct s3dat_mmf_t {
+struct s3util_mmf_t {
 	void* addr;
 	uint32_t pos;
 	uint32_t len;
@@ -86,22 +102,22 @@ struct s3dat_mmf_t {
 	void* additional_data; // win32 handles
 };
 
-struct s3dat_internal_attribute_t {
+struct s3util_internal_attribute_t {
 	uint32_t name;
 	uint32_t value;
 
-	s3dat_internal_attribute_t* next;
+	s3util_internal_attribute_t* next;
 };
 
-struct s3dat_exception_t {
+struct s3util_exception_t {
 	uint32_t type;
-	s3dat_t* parent;
+	s3util_memset_t* memset;
 
-	s3dat_internal_stack_t* stack;
-	s3dat_internal_attribute_t* attrs;
+	s3util_internal_stack_t* stack;
+	s3util_internal_attribute_t* attrs;
 };
 
-struct s3dat_ioset_t {
+struct s3util_ioset_t {
 	bool (*read_func) (void*, void*, size_t);
 	bool (*write_func) (void*, void*, size_t);
 	size_t (*size_func) (void*);
@@ -111,22 +127,90 @@ struct s3dat_ioset_t {
 	void (*close_func) (void*);
 	void* (*fork_func) (void*);
 	bool available;
+	void* arg;
+};
+
+struct s3util_memset_t {
+	void* (*alloc_func) (void*, size_t);
+	void (*free_func) (void*, void*);
+	void* arg;
 };
 
 
-void s3dat_free_func(s3dat_t* handle, void* data);
-void* s3dat_alloc_func(s3dat_t* handle, size_t size, s3dat_exception_t** throws);
+void s3util_free_func(s3util_memset_t* memset, void* data);
+void* s3util_alloc_func(s3util_memset_t* memset, size_t size, s3util_exception_t** throws);
 
 
-void s3dat_add_attr(s3dat_t* handle, s3dat_exception_t** throws, uint32_t name, uint32_t value);
-void s3dat_add_to_stack(s3dat_t* handle, s3dat_exception_t** throws, uint8_t* file, const uint8_t* function, uint32_t line);
-void s3dat_throw(s3dat_t* handle, s3dat_exception_t** throws, uint32_t exception, uint8_t* file, const uint8_t* function, uint32_t line);
+void s3util_add_attr(s3util_memset_t* memset, s3util_exception_t** throws, uint32_t name, uint32_t value);
+void s3util_add_to_stack(s3util_memset_t* memset, s3util_exception_t** throws, char* file, const char* function, uint32_t line);
+void s3util_throw(s3util_memset_t* memset, s3util_exception_t** throws, uint32_t exception, char* file, const char* function, uint32_t line);
+void s3util_print_exception(s3util_exception_t* ex);
+void s3util_delete_exception(s3util_memset_t* memset, s3util_exception_t* ex);
+bool s3util_catch_exception(s3util_exception_t** throws);
 
 
-uint32_t s3dat_le32(uint32_t le32_int);
-uint16_t s3dat_le16(uint16_t le16_int);
+uint32_t s3util_internal_read32LE(s3util_ioset_t* ioset, s3util_memset_t* memset, s3util_exception_t** throws);
+uint16_t s3util_internal_read16LE(s3util_ioset_t* ioset, s3util_memset_t* memset, s3util_exception_t** throws);
+uint8_t s3util_internal_read8(s3util_ioset_t* ioset, s3util_memset_t* memset, s3util_exception_t** throws);
 
-uint32_t s3dat_le32p(uint32_t* le32_int);
-uint16_t s3dat_le16p(uint16_t* le16_int);
+void s3util_internal_write32LE(s3util_ioset_t* ioset, s3util_memset_t* memset, uint32_t b32_int, s3util_exception_t** throws);
+void s3util_internal_write16LE(s3util_ioset_t* ioset, s3util_memset_t* memset, uint16_t b16_int, s3util_exception_t** throws);
+void s3util_internal_write8(s3util_ioset_t* ioset, s3util_memset_t* memset, uint8_t b8_int, s3util_exception_t** throws);
+
+uint32_t s3util_le32(uint32_t le32_int);
+uint16_t s3util_le16(uint16_t le16_int);
+
+uint32_t s3util_le32p(uint32_t* le32_int);
+uint16_t s3util_le16p(uint16_t* le16_int);
+
+//ioset and memory functions
+s3util_ioset_t* s3util_get_default_ioset(uint32_t type);
+
+void* s3util_monitor_alloc_func(void* arg, size_t size);
+void s3util_monitor_free_func(void* arg, void* mem);
+
+void* s3util_default_alloc_func(void* arg, size_t size);
+void s3util_default_free_func(void* arg, void* mem);
+
+//linux
+void* s3util_linux_open_func(void* arg, bool write);
+void s3util_linux_close_func(void* arg);
+bool s3util_linux_read_func(void* arg, void* bfr, size_t len);
+bool s3util_linux_write_func(void* arg, void* bfr, size_t len);
+bool s3util_linux_seek_func(void* arg, uint32_t pos, int whence);
+size_t s3util_linux_pos_func(void* arg);
+size_t s3util_linux_size_func(void* arg);
+
+void* s3util_mmf_linux_fd_open_func(void* arg, bool write);
+void* s3util_mmf_linux_name_open_func(void* arg, bool write);
+void s3util_mmf_linux_close_func(void* arg);
+
+//windows
+void* s3util_win32_open_func(void* arg, bool write);
+void s3util_win32_close_func(void* arg);
+bool s3util_win32_read_func(void* arg, void* bfr, size_t len);
+bool s3util_win32_write_func(void* arg, void* bfr, size_t len);
+bool s3util_win32_seek_func(void* arg, uint32_t pos, int whence);
+size_t s3util_win32_pos_func(void* arg);
+size_t s3util_win32_size_func(void* arg);
+
+void* s3util_mmf_win32_handle_open_func(void* arg, bool write);
+void* s3util_mmf_win32_name_open_func(void* arg, bool write);
+void s3util_mmf_win32_close_func(void* arg);
+
+void* s3util_libc_open_func(void* arg, bool write);
+void s3util_libc_close_func(void* arg);
+bool s3util_libc_read_func(void* arg, void* bfr, size_t len);
+bool s3util_libc_write_func(void* arg, void* bfr, size_t len);
+bool s3util_libc_seek_func(void* arg, uint32_t pos, int whence);
+size_t s3util_libc_pos_func(void* arg);
+size_t s3util_libc_size_func(void* arg);
+
+bool s3util_mmf_read_func(void* arg, void* bfr, size_t len);
+bool s3util_mmf_write_func(void* arg, void* bfr, size_t len);
+bool s3util_mmf_seek_func(void* arg, uint32_t pos, int whence);
+size_t s3util_mmf_pos_func(void* arg);
+size_t s3util_mmf_size_func(void* arg);
+void* s3util_mmf_fork_func(void* arg);
 
 #endif /*S3UTIL_H*/

@@ -2,5 +2,6 @@
 #define S3UTIL_CONFIG_H
 
 #cmakedefine IS_BE 1
+#cmakdefine PRIVATE_FILENAME
 
 #endif /*S3UTIL_CONFIG_H*/
