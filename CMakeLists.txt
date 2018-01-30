@@ -4,7 +4,7 @@ project(libs3util)
 include(CPack)
 include(TestBigEndian)
 
-set(CMAKE_C_FLAGS "-Wall -Wno-pointer-sign")
+set(CMAKE_C_FLAGS "-Wall")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
