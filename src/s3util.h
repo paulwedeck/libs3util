@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #define S3UTIL_ATTRIBUTE_INDEX 0x200
 #define S3UTIL_ATTRIBUTE_SEQ 0x201
@@ -81,6 +82,7 @@
 typedef struct s3util_internal_attribute_t s3util_internal_attribute_t;
 typedef struct s3util_internal_stack_t s3util_internal_stack_t;
 typedef struct s3util_exception_t s3util_exception_t;
+typedef struct s3util_monitor_t s3util_monitor_t;
 typedef struct s3util_memset_t s3util_memset_t;
 typedef struct s3util_ioset_t s3util_ioset_t;
 typedef struct s3util_mmf_t s3util_mmf_t;
@@ -136,6 +138,17 @@ struct s3util_memset_t {
 	void* arg;
 };
 
+struct s3util_monitor_t {
+	void* io_arg;
+	bool close;
+	s3util_ioset_t* ioset;
+
+	void* mem_arg;
+	void* (*alloc_func) (void*,size_t);
+	void (*free_func) (void*,void*);
+
+	uint32_t last_state;
+};
 
 void s3util_free_func(s3util_memset_t* memset, void* data);
 void* s3util_alloc_func(s3util_memset_t* memset, size_t size, s3util_exception_t** throws);
@@ -171,6 +184,8 @@ void s3util_monitor_free_func(void* arg, void* mem);
 
 void* s3util_default_alloc_func(void* arg, size_t size);
 void s3util_default_free_func(void* arg, void* mem);
+
+void s3util_monitor_print(s3util_monitor_t* monitor);
 
 //linux
 void* s3util_linux_open_func(void* arg, bool write);

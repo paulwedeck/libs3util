@@ -90,3 +90,48 @@ void* s3util_alloc_func(s3util_memset_t* memset, size_t size, s3util_exception_t
 
 	return new_block;
 }
+
+void* s3util_default_alloc_func(void* arg, size_t size) {
+	return calloc(size, 1);
+}
+
+void* s3util_monitor_alloc_func(void* arg, size_t size) {
+	s3util_monitor_t* mon = arg;
+	mon->last_state += size;
+
+	s3util_monitor_print(mon);
+
+	uint8_t* mem = mon->alloc_func(mon->mem_arg, size+4);
+	if(!mem) return NULL;
+
+	*((uint32_t*)mem) = size;
+
+	return mem+4;
+}
+
+
+void s3util_default_free_func(void* arg, void* mem) {
+	if(mem != NULL) free(mem);
+}
+
+void s3util_monitor_free_func(void* arg, void* mem) {
+	s3util_monitor_t* mon = arg;
+	mon->last_state -= *(((uint32_t*)mem)-1);
+
+	s3util_monitor_print(mon);
+
+	mon->free_func(mon->mem_arg, ((uint32_t*)mem)-1);
+
+	if(mon->last_state == 0) {
+		if(mon->close) mon->ioset->close_func(mon->io_arg);
+		mon->free_func(mon->mem_arg, mon);
+	}
+}
+
+void s3util_monitor_print(s3util_monitor_t* monitor) {
+	char bfr[1024];
+
+	snprintf(bfr, 1023, "%li %u\n", clock(), monitor->last_state);
+
+	monitor->ioset->write_func(monitor->io_arg, bfr, strlen(bfr));
+}
