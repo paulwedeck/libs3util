@@ -170,6 +170,8 @@ void s3util_internal_write32LE(s3util_ioset_t* ioset, s3util_memset_t* memset, u
 void s3util_internal_write16LE(s3util_ioset_t* ioset, s3util_memset_t* memset, uint16_t b16_int, s3util_exception_t** throws);
 void s3util_internal_write8(s3util_ioset_t* ioset, s3util_memset_t* memset, uint8_t b8_int, s3util_exception_t** throws);
 
+void s3util_internal_seek_func(s3util_ioset_t* ioset, s3util_memset_t* memset, uint32_t pos, int whence, s3util_exception_t** throws);
+
 uint32_t s3util_le32(uint32_t le32_int);
 uint16_t s3util_le16(uint16_t le16_int);
 
