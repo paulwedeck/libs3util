@@ -19,7 +19,7 @@ uint16_t s3util_iso8859_2_to_utf8_map[96] = {0xA0, 0x104, 0x2D8, 0x141, 0xA4, 0x
 
 void s3util_iso8859_to_utf8(s3util_memset_t* memset, char** str, uint32_t len, bool iso8859_2, s3util_exception_t** throws) {
 
-	char* bfr = *str;
+	unsigned char* bfr = (unsigned char*) *str;
 
 	uint32_t real_len = 0;
 	for(uint32_t i = 0;i != len;i++) {
@@ -33,7 +33,7 @@ void s3util_iso8859_to_utf8(s3util_memset_t* memset, char** str, uint32_t len, b
 		}
 	}
 
-	char* bfr2 = s3util_alloc_func(memset, real_len, throws);
+	unsigned char* bfr2 = s3util_alloc_func(memset, real_len, throws);
 	S3UTIL_HANDLE_EXCEPTION(memset, throws, __FILE__, __func__, __LINE__);
 
 	uint32_t bfr2_ptr = 0;
@@ -61,7 +61,7 @@ void s3util_iso8859_to_utf8(s3util_memset_t* memset, char** str, uint32_t len, b
 	s3util_free_func(memset, bfr);
 	bfr2[real_len-1] = '\0';
 
-	*str = bfr2;
+	*str = (char*) bfr2;
 }
 
 #ifdef USE_ICONV
