@@ -1,6 +1,10 @@
 #ifndef S3UTIL_H
 #define S3UTIL_H
 
+#ifdef USE_ICONV
+#include <iconv.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -29,7 +33,6 @@
 #define S3UTIL_ATTRIBUTE_SEQ 0x201
 #define S3UTIL_ATTRIBUTE_SONG 0x20
 
-#define S3UTIL_EXCEPTION_WRONG_RESTYPE 0x109
 #define S3UTIL_EXCEPTION_IOERROR 0x101
 #define S3UTIL_EXCEPTION_HEADER 0x102
 #define S3UTIL_EXCEPTION_CONFLICTING_DATA 0x103
@@ -39,6 +42,7 @@
 #define S3UTIL_EXCEPTION_OPEN 0x107
 #define S3UTIL_EXCEPTION_IOSET 0x108
 #define S3UTIL_EXCEPTION_WRONG_RESTYPE 0x109
+#define S3UTIL_EXCEPTION_NOICONV 0x110
 #define S3UTIL_EXCEPTION_OUT_OF_MEMORY 0x200
 
 
@@ -177,6 +181,11 @@ uint16_t s3util_le16(uint16_t le16_int);
 
 uint32_t s3util_le32p(uint32_t* le32_int);
 uint16_t s3util_le16p(uint16_t* le16_int);
+
+//text
+void s3util_short(s3util_memset_t* memset, char** str);
+void s3util_iso8859_to_utf8(s3util_memset_t* memset, char** str, uint32_t len, bool iso8859_2, s3util_exception_t** throws);
+void s3util_iconv_dat_to_utf8(s3util_memset_t* memset, char* charset, char* cstr, char** utf8_str, s3util_exception_t** throws);
 
 //ioset and memory functions
 s3util_ioset_t* s3util_get_default_ioset(uint32_t type);
