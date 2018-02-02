@@ -96,6 +96,7 @@ s3util_internal_map_entry_t exception_map[] = {
 	{S3UTIL_EXCEPTION_IOSET, "NullIOSetError"},
 	{S3UTIL_EXCEPTION_OUT_OF_MEMORY, "OutOfMemoryError"},
 	{S3UTIL_EXCEPTION_NOICONV, "NoIconvSupportError"},
+	{S3UTIL_EXCEPTION_NOTFOUND, "NotFoundError"},
 	{0, NULL}
 };
 
