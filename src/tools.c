@@ -135,3 +135,66 @@ void s3util_monitor_print(s3util_monitor_t* monitor) {
 
 	monitor->ioset->write_func(monitor->io_arg, bfr, strlen(bfr));
 }
+
+s3util_color_t s3util_native_to_8b(void *addr, s3util_color_type type) {
+	s3util_color_t color = {0, 0, 0, 0xFF};
+	if(type == s3util_alpha1) return color;
+
+
+	double d58 = 255.0/31.0;
+	double d68 = 255.0/63.0;
+
+	if(type == s3util_gray5) {
+		color.red = color.green = color.blue = (uint8_t)((*((uint8_t*)addr) & 0x1F)*d58);
+		return color;
+	}
+
+	uint16_t raw = s3util_le16p(addr);
+
+	if(type == s3util_rgb555) {
+		color.red = (uint8_t)(((raw >> 10) & 0x1F)*d58);
+		color.green = (uint8_t)(((raw >> 5) & 0x1F)*d58);
+	} else {
+		color.red = (uint8_t)(((raw >> 11)& 0x1F)*d58);
+		color.green = (uint8_t)(((raw >> 5) & 0x3F)*d68);
+	}
+	color.blue = (uint8_t)((raw & 0x1F)*d58);
+
+	return color;
+}
+
+void s3util_internal_8b_to_native(s3util_color_t *color, void *to, s3util_color_type type) {
+	if(type == s3util_alpha1) return;
+
+	uint8_t* ptr8 = to;
+	uint16_t* ptr16 = to;
+
+	double d85 = 31.0/255.0;
+	double d86 = 63.0/255.0;
+
+	if(type == s3util_gray5) {
+		uint8_t gray5 = (uint8_t) (((color->red+color->green+color->blue)/3)*d85);
+		*ptr8 = (uint8_t) (gray5 & 0x1F);
+		return;
+	}
+
+	uint16_t red, green;
+
+	uint16_t blue = (uint16_t)(color->blue*d85);
+
+	if(type == s3util_rgb555) {
+		red = (uint8_t) (color->red*d85);
+		green = (uint8_t) (color->green*d85);
+
+		red = (red) << 10;
+		green = (green) << 5;
+	} else {
+		red = (uint8_t) (color->red*d85);
+		green = (uint8_t) (color->green*d86);
+
+		red = (red) << 11;
+		green = (green) << 5;
+	}
+
+	*ptr16 = s3util_le16(red + green + blue);
+}

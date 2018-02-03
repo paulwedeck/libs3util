@@ -84,12 +84,21 @@
 #define S3UTIL_INTERNAL_WRITE(type, ioset, memset, to, throws) \
 	S3UTIL_CONCAT(s3util_internal_write, type)(ioset, memset, to, throws);
 
+typedef enum {
+	s3util_alpha1,
+	s3util_rgb565,
+	s3util_rgb555,
+	s3util_gray5,
+	s3util_unknown_color, // s3dat_new_bitmap in s3dat_ext.h
+} s3util_color_type;
+
 typedef struct s3util_internal_attribute_t s3util_internal_attribute_t;
 typedef struct s3util_internal_stack_t s3util_internal_stack_t;
 typedef struct s3util_exception_t s3util_exception_t;
 typedef struct s3util_monitor_t s3util_monitor_t;
 typedef struct s3util_memset_t s3util_memset_t;
 typedef struct s3util_ioset_t s3util_ioset_t;
+typedef struct s3util_color_t s3util_color_t;
 typedef struct s3util_mmf_t s3util_mmf_t;
 
 struct s3util_internal_stack_t {
@@ -98,6 +107,13 @@ struct s3util_internal_stack_t {
 	uint32_t line;
 
 	s3util_internal_stack_t* down;
+};
+
+struct s3util_color_t {
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	uint8_t alpha;
 };
 
 struct s3util_mmf_t {
@@ -166,6 +182,8 @@ void s3util_print_exception(s3util_exception_t* ex);
 void s3util_delete_exception(s3util_memset_t* memset, s3util_exception_t* ex);
 bool s3util_catch_exception(s3util_exception_t** throws);
 
+void s3util_internal_8b_to_native(s3util_color_t *color, void *to, s3util_color_type type);
+s3util_color_t s3util_native_to_8b(void *addr, s3util_color_type type);
 
 uint32_t s3util_internal_read32LE(s3util_ioset_t* ioset, s3util_memset_t* memset, s3util_exception_t** throws);
 uint16_t s3util_internal_read16LE(s3util_ioset_t* ioset, s3util_memset_t* memset, s3util_exception_t** throws);
