@@ -1,3 +1,4 @@
+#include "config.s3util.h"
 #include "s3util.h"
 #ifdef PRIVATE_FILENAME
 #line __LINE__ "exception.c"
