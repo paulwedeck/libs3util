@@ -57,10 +57,13 @@ add_library(s3util SHARED ${s3util_SOURCES})
 target_include_directories(s3util PUBLIC $<INSTALL_INTERFACE:include>)
 
 write_basic_package_version_file(${PROJECT_BINARY_DIR}/s3utilConfigVersion.cmake COMPATIBILITY ExactVersion)
-configure_package_config_file(s3utilConfig.cmake.in s3utilConfig.cmake INSTALL_DESTINATION lib/cmake/s3util PATH_VARS CMAKE_INSTALL_PREFIX)
+configure_package_config_file(s3utilConfig.cmake.in s3utilConfig.cmake INSTALL_DESTINATION lib/cmake/s3util PATH_VARS CMAKE_INSTALL_PREFIX PROJECT_BINARY_DIR)
 
 install(TARGETS s3util EXPORT s3utilTarget DESTINATION lib)
 install(EXPORT s3utilTarget DESTINATION lib/cmake/s3util)
+
+#for find_package on build dirs
+export(TARGETS s3util FILE s3utilTarget.cmake)
 
 install(FILES src/s3util.h DESTINATION include)
 install(FILES ${PROJECT_BINARY_DIR}/libs3util.pc DESTINATION lib/pkgconfig)
