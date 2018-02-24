@@ -3,5 +3,5 @@
 include(${CMAKE_CURRENT_LIST_DIR}/s3utilTarget.cmake)
 
 if(NOT DEFINED s3util_INCLUDE_DIRS)
-set(s3util_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/src)
+set(s3util_INCLUDE_DIRS @CMAKE_SOURCE_DIR@/src)
 endif()
