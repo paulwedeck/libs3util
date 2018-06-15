@@ -79,10 +79,10 @@
 #define S3UTIL_CONCAT(a, b) a##b
 
 #define S3UTIL_INTERNAL_READ(type, ioset, memset, throws) \
-	S3UTIL_CONCAT(s3util_internal_read, type)(ioset, memset, throws);
+	S3UTIL_CONCAT(s3util_internal_read, type)(ioset, memset, throws)
 
 #define S3UTIL_INTERNAL_WRITE(type, ioset, memset, to, throws) \
-	S3UTIL_CONCAT(s3util_internal_write, type)(ioset, memset, to, throws);
+	S3UTIL_CONCAT(s3util_internal_write, type)(ioset, memset, to, throws)
 
 typedef enum {
 	s3util_alpha1,
